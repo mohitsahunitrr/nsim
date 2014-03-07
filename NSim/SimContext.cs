@@ -10,11 +10,8 @@ namespace NSim
     {
         private DateTime _simTime;
 
-        private MinHeap<IEvent> _heap = new MinHeap<IEvent>();
-
-        public SimContext()
-        {
-        }
+        private readonly MinHeap<IEvent> _heap = new MinHeap<IEvent>();
+        private readonly Random _random = new Random();
 
         public DateTime Step()
         {
@@ -32,10 +29,9 @@ namespace NSim
         private void ProcessEvent(IEvent value)
         {
             if (value == null) throw new ArgumentNullException("e");
-            if (value.Context != this) throw new InvalidOperationException("event doens't belong to this context");
 
-            foreach (var callback in value.Callbacks)
-                callback();
+
+            value.Fire();
 
             value.Dispose();
         }
@@ -55,7 +51,6 @@ namespace NSim
         public void Schedule(IEvent e)
         {
             if (e == null) throw new ArgumentNullException("e");
-            if (e.Context != this) throw new InvalidOperationException("event doens't belong to this context");
             _heap.Add(_simTime.Ticks, e);
         }
 
@@ -77,22 +72,34 @@ namespace NSim
         public void Schedule(IEvent e, DateTime at)
         {
             if (e == null) throw new ArgumentNullException("e");
-            if (e.Context != this) throw new InvalidOperationException("event doens't belong to this context");
             _heap.Add(at.Ticks, e);
         }
 
-        public void Process(IEnumerable<IEvent> process)
+        public IEvent Process(IEnumerable<IEvent> process)
         {
             if (process == null) throw new ArgumentNullException("process");
-            Process(process.GetEnumerator());
+            var e = new ProcessCompletionEvent();
+            Process(process.GetEnumerator(),e );
+            return e;
         }
 
-        private void Process(IEnumerator<IEvent> enumerator)
+        public Random Random { get { return _random; } }
+
+        private void Process(IEnumerator<IEvent> enumerator, ProcessCompletionEvent e)
         {
-            if (enumerator.MoveNext())
+            while (enumerator.MoveNext())
             {
-                enumerator.Current.Callbacks.Add(() => Process(enumerator));
+                var item = enumerator.Current;
+                if (!item.IsFired)
+                {
+                    item.Callbacks.Add(() => Process(enumerator, e));
+                    item.Schedule(this);
+                    return;
+                }
             }
+
+            if(!e.IsFired)  //todo
+                e.Fire();
         }
 
         public void Schedule(IEvent e, int priority, DateTime at)

@@ -37,5 +37,10 @@ namespace NSim
         {
             return d + interval;
         }
+
+        public static TimeSpan Seconds(this double val)
+        {
+            return TimeSpan.FromSeconds(val);
+        }
     }
 }

@@ -8,14 +8,18 @@ namespace NSim
         void Succeed(T obj);
         new ICollection<Action<T>> Callbacks { get; }
         T Result { get; }
+        
     }
 
     public interface IEvent : IDisposable
     {
-        IContext Context { get; }
-        EventState State { get; }
-        void Succeed();
-        void Fail(Exception e);
+        //IContext Context { get; }
+        //EventState State { get; }
+        //void Succeed();
+        //void Fail(Exception e);
+        void Fire();
+        bool IsFired { get; }
+        void Schedule(IContext c);
         ICollection<Action> Callbacks { get; }
     }
 }

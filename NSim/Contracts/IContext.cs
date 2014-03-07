@@ -12,6 +12,7 @@ namespace NSim
         void Schedule(IEvent e);
         void Schedule(IEvent e, TimeSpan delay);
         void Schedule(IEvent e, DateTime @at);
-        void Process(IEnumerable<IEvent> process);
+        IEvent Process(IEnumerable<IEvent> process);
+        Random Random { get; }
     }
 }

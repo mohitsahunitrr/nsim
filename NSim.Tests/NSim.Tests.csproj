@@ -50,6 +50,8 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Capacity1.cs" />
+    <Compile Include="Renege1.cs" />
     <Compile Include="Timeout1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

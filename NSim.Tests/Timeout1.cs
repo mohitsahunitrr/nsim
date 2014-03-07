@@ -31,11 +31,13 @@ namespace NSim.Tests
         {
             for (;;)
             {
-                yield return new Timeout(e, ts);
+                yield return new Timeout(ts);
                 _val = e.Now;
             }
         }
     }
+
+    
 
 
 }
