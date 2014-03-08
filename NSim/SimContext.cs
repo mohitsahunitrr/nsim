@@ -12,6 +12,7 @@ namespace NSim
 
         private readonly MinHeap<IEvent> _heap = new MinHeap<IEvent>();
         private readonly Random _random = new Random();
+        private readonly List<IIncrementallyUpdated> _incrementalUpdateSet = new List<IIncrementallyUpdated>();
 
         public DateTime Step()
         {
@@ -41,9 +42,45 @@ namespace NSim
             throw new NotImplementedException();
         }
 
-        public void Run(DateTime until)
+        public void Run(TimeSpan @for, TimeSpan interval)
         {
             throw new NotImplementedException();
+        }
+
+        public void Run(DateTime until)
+        {
+            while (_simTime <= until)
+            {
+                Step();
+            }
+        }
+
+        public void Run(DateTime until, TimeSpan interval)
+        {
+            if (_heap.Count == 0)
+                throw new ScheduleEmptyException();
+
+            //todo: when there is nothign in the update set, can skip to the next event in the schedule
+
+            DateTime newTime;
+            while ((newTime = Now + interval) <= until)
+            {
+                //process relevant events in the schedule
+                while (_heap.MinimumKey() <= newTime.Ticks)
+                {
+                    var nextEvent = _heap.Pop();
+                    _simTime = new DateTime(nextEvent.Key);
+                    ProcessEvent(nextEvent.Value);
+                }
+
+                //run updaters
+                _simTime = newTime;
+
+                foreach (var item in _incrementalUpdateSet)
+                {
+                    item.AdvanceBy(interval, this);
+                }
+            }
         }
 
         public DateTime Now { get { return _simTime; } }
@@ -85,15 +122,24 @@ namespace NSim
 
         public Random Random { get { return _random; } }
 
-        private void Process(IEnumerator<IEvent> enumerator, ProcessCompletionEvent e)
+        private void Process(IEnumerator<IEvent> enumerator, ProcessCompletionEvent e, IIncrementallyUpdated last = null)
         {
+            if (last != null)
+            {
+                _incrementalUpdateSet.Remove(last);
+            }
             while (enumerator.MoveNext())
             {
                 var item = enumerator.Current;
+                var updateOnStep = enumerator.Current as IIncrementallyUpdated;
                 if (!item.IsFired)
                 {
-                    item.Callbacks.Add(() => Process(enumerator, e));
+                    item.Callbacks.Add(() => Process(enumerator, e, updateOnStep));
                     item.Schedule(this);
+                    if (updateOnStep != null)
+                    {
+                        _incrementalUpdateSet.Add(updateOnStep); 
+                    }
                     return;
                 }
             }

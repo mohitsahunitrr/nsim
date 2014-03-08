@@ -5,7 +5,7 @@ namespace NSim
 {
     public interface IEvent<T> : IEvent
     {
-        void Succeed(T obj);
+        void Fire(T obj);
         new ICollection<Action<T>> Callbacks { get; }
         T Result { get; }
         

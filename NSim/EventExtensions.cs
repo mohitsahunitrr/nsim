@@ -7,14 +7,9 @@ namespace NSim
 {
     public static class EventExtensions
     {
-        public static IEvent Or(this IEvent a, IEvent b)
+        public static OrEvent Or(this IEvent a, IEvent b)
         {
-            if (a.IsFired)
-                return a;
-            else if (b.IsFired)
-                return b;
-            else
-                return new OrEvent(a, b);
+            return new OrEvent(a, b);
         }
     }
 }

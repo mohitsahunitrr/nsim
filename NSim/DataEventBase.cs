@@ -6,7 +6,7 @@ namespace NSim
 {
     public abstract class DataEventBase<T> : IEvent<T>
     {
-        private ICollection<Action<T>> _callbacks;
+        protected ICollection<Action<T>> _callbacks;
 
         protected DataEventBase()
         {
@@ -34,12 +34,12 @@ namespace NSim
 
         void IEvent.Fire()
         {
-            Succeed(default(T));
+            Fire(default(T));
         }
 
         public virtual bool IsFired { get; protected set; }
 
-        public virtual void Succeed(T obj)
+        public virtual void Fire(T obj)
         {
             if (this.IsFired) throw new InvalidOperationException("event has already fired");
 

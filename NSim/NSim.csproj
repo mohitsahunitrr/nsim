@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IIncrementallyUpdated.cs" />
+    <Compile Include="SignalEvent.cs" />
     <Compile Include="ContinuousContainerRequestEvent.cs" />
     <Compile Include="Contracts\EventState.cs" />
     <Compile Include="Contracts\IContext.cs" />
